@@ -6,6 +6,7 @@ Created on Sun Nov 24 17:49:17 2013
 """
 from os.path import join
 from igraph import Graph
+import scipy.linalg
 
 try:
     from config import *
@@ -26,16 +27,15 @@ def file2igraph(file):
         g.add_edges(e_list)
         return g
 
-def plot_eig(graph):
-    e = np.sort(np.linalg.eig(graph.get_adjacency().data)[0])
-    print ["%0.3f" % item for item in e]
-    plt.plot(e)
-    plt.ylabel('Eigen Values')
-    plt.show()
-
 def get_eff_strength(graph, b,d):
-    eig = 0 #largest eigen value
+    M = len(list(graph.vs))
+    eig = scipy.linalg.eigh(graph.get_adjacency().data,
+                            eigvals_only=True,
+                            eigvals=(M-1, M-1))
+
+    print 'Largest Eigen Value: %0.3f'% (eig)
     return eig*b/d
 
 a = file2igraph(join(DATA_URL,'static.network'))
+eff_strength = get_eff_strength(a, B1, D1)
 
