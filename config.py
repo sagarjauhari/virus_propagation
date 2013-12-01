@@ -1,3 +1,6 @@
+# Local Configuration
+DATA_URL="../data"
+
 ## Virus Propagation configuration
 # Transmission probabilities
 b1 = 0.20
