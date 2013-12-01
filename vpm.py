@@ -2,7 +2,7 @@
 """
 Created on Sun Nov 24 17:49:17 2013
 
-@author: sagar
+@author: sagar jauhari
 """
 from os.path import join
 from igraph import Graph
@@ -36,6 +36,6 @@ def get_eff_strength(graph, b,d):
     print 'Largest Eigen Value: %0.3f'% (eig)
     return eig*b/d
 
-a = file2igraph(join(DATA_URL,'static.network'))
-eff_strength = get_eff_strength(a, B1, D1)
+graph = file2igraph(join(DATA_URL,'static.network'))
+eff_strength = get_eff_strength(graph, B1, D1)
 
