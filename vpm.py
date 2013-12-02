@@ -18,7 +18,7 @@ def sis_vpm_simulate(graph, B, D, c, t):
     graph: contact network
     B: transmission probability
     D: healing probability
-    c: number of initially infected nodes
+    c: fraction of initially infected nodes
     t: number of time steps
 
     The initially infected nodes are chosen from a random uniform
@@ -32,10 +32,9 @@ def sis_vpm_simulate(graph, B, D, c, t):
     neighbors with probability B. At the same time, i may be cured with
     probability D.
     """
+    assert 0<=c<=1, ' c should be between 0 and 1'
     N = len(list(graph.vs)) # Number of nodes
-    assert c<=N,"c should be less than number of nodes in graph"
-
-    infected = set(random.sample(xrange(N),c))
+    infected = set(random.sample(xrange(N),int(c*N)))
 
     #Start simulation
     for _i in range(t):
@@ -49,7 +48,7 @@ def sis_vpm_simulate(graph, B, D, c, t):
 
         # For all the nodes which were in infected state before this time step:
         # cure them with probability D
-        cured = random.sample(infected, int(D*len(infected)))
+        cured = random.sample(infected, int(math.ceil(D*len(infected))))
 
         # So, now we have infected (old), infected_new & cured
         for n in infected_new:
@@ -69,4 +68,4 @@ if __name__=='__main__':
     g.add_edges([(0,1),(0,2),(0,3),(0,4),(1,2),(1,3),(1,4),
                  (4,5),(5,6),(6,7),(7,8),(8,9),(5,9),(5,8)])
     #plot(g)
-    sis_vpm_simulate(g, 0.1, 0.9, 5, 100)
+    sis_vpm_simulate(g, 0.4, 0.5, 0.1, 10)
