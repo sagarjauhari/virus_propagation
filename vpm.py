@@ -5,6 +5,7 @@ Created on Sun Nov 24 17:49:17 2013
 @author: sagar jauhari
 """
 from igraph import *
+import random
 
 try:
     from config import *
@@ -26,7 +27,40 @@ def sis_vpm_simulate(graph, B, D, c, t):
     infected nodes, and every infected node has a 'D' probability of healing
     and becoming susceptible again. The program also calculates the fraction
     of infected nodes at each time step.
+
+    During each time interval t, an infected node i tries to infect its
+    neighbors with probability B. At the same time, i may be cured with
+    probability D.
     """
+    N = len(list(graph.vs)) # Number of nodes
+    assert c<=N,"c should be less than number of nodes in graph"
+
+    infected = set(random.sample(xrange(N),c))
+
+    #Start simulation
+    for _i in range(t):
+        # For each infected node, infect its neighbors with probability B
+        infected_new = set()
+        for n in infected:
+            nbrs = graph.neighbors(n)
+            nbrs_infected = random.sample(nbrs, int(B*len(nbrs)))
+            for j in nbrs_infected:
+                infected_new.add(j)
+
+        # For all the nodes which were in infected state before this time step:
+        # cure them with probability D
+        cured = random.sample(infected, int(D*len(infected)))
+
+        # So, now we have infected (old), infected_new & cured
+        for n in infected_new:
+            infected.add(n)
+
+        for n in cured:
+            infected.remove(n)
+
+        print 'Infected Nodes: %d'%(len(infected))
+
+
 
 
 if __name__=='__main__':
@@ -34,4 +68,5 @@ if __name__=='__main__':
     g.add_vertices(10)
     g.add_edges([(0,1),(0,2),(0,3),(0,4),(1,2),(1,3),(1,4),
                  (4,5),(5,6),(6,7),(7,8),(8,9),(5,9),(5,8)])
-    plot(g)
+    #plot(g)
+    sis_vpm_simulate(g, 0.1, 0.9, 5, 100)
