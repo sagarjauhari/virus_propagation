@@ -36,6 +36,8 @@ def sis_vpm_simulate(graph, B, D, c, t):
     N = len(list(graph.vs)) # Number of nodes
     infected = set(random.sample(xrange(N),int(c*N)))
 
+    num_infected = []
+
     #Start simulation
     for _i in range(t):
         # For each infected node, infect its neighbors with probability B
@@ -57,10 +59,23 @@ def sis_vpm_simulate(graph, B, D, c, t):
         for n in cured:
             infected.remove(n)
 
-        print 'Infected Nodes: %d'%(len(infected))
+        num_infected.append(len(infected))
+    return num_infected
 
+def run_simulation(model, runs, graph, B, D, c, t):
+    """
+    Runs the simulation several times and return average nummber
+    of infected nodes
+    """
+    if model=='SIS':
+        sim_res=range(runs)
+        for i in range(runs):
+            sim_res[i] = sis_vpm_simulate(graph, B, D, c, t)
 
-
+        avg_res = []
+        for i in range(t):
+            avg_res.append(mean([sim_res[j][i] for j in range(runs)]))
+        return avg_res
 
 if __name__=='__main__':
     g=Graph()
@@ -68,4 +83,4 @@ if __name__=='__main__':
     g.add_edges([(0,1),(0,2),(0,3),(0,4),(1,2),(1,3),(1,4),
                  (4,5),(5,6),(6,7),(7,8),(8,9),(5,9),(5,8)])
     #plot(g)
-    sis_vpm_simulate(g, 0.4, 0.5, 0.1, 10)
+    print sis_vpm_simulate(g, 0.4, 0.5, 0.1, 10)
