@@ -69,6 +69,20 @@ def sis_vpm_simulate(graph, B, D, c, t, immunize=None):
         num_infected.append(len(infected))
     return num_infected
 
+def immun_random(graph, k):
+    N = len(graph.vs())
+    nodes = random.sample(range(N), k)
+    return nodes
+
+def immun_highest_degree():
+    pass
+
+def immun_highest_degree_iterative():
+    pass
+
+def immun_largest_eigen_vec():
+    pass
+
 def run_simulation(model, runs, graph, B, D, c, t):
     """
     Runs the simulation several times and return average nummber
