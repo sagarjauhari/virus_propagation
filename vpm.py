@@ -75,17 +75,28 @@ def immun_random(graph, k):
     assert k<=N,'k should be less than N'
 
     nodes = random.sample(range(N), k)
-    return nodes
+    graph.delete_vertices(nodes)
+    return graph
 
 def immun_highest_degree(graph, k):
     N = size(graph.vs())
     assert k<=N,'k should be less than N'
 
     degrees = [graph.degree(i) for i in range(N)]
-    return list(np.argsort(degrees)[-5:])
+    nodes = list(np.argsort(degrees)[-k:])
+    graph.delete_vertices(nodes)
+    return graph
 
-def immun_highest_degree_iterative():
-    pass
+def immun_highest_degree_iterative(graph, k):
+    N = size(graph.vs())
+    assert k<=N,'k should be less than N'
+
+    for _i in range(k):
+        node = immun_highest_degree(graph, 1)
+        gg.delete_vertices(node)
+
+    return graph
+
 
 def immun_largest_eigen_vec():
     pass
