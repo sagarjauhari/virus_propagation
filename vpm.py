@@ -6,6 +6,7 @@ Created on Sun Nov 24 17:49:17 2013
 """
 from igraph import *
 import random
+import numpy as np
 
 try:
     from config import *
@@ -70,12 +71,18 @@ def sis_vpm_simulate(graph, B, D, c, t, immunize=None):
     return num_infected
 
 def immun_random(graph, k):
-    N = len(graph.vs())
+    N = size(graph.vs())
+    assert k<=N,'k should be less than N'
+
     nodes = random.sample(range(N), k)
     return nodes
 
-def immun_highest_degree():
-    pass
+def immun_highest_degree(graph, k):
+    N = size(graph.vs())
+    assert k<=N,'k should be less than N'
+
+    degrees = [graph.degree(i) for i in range(N)]
+    return list(np.argsort(degrees)[-5:])
 
 def immun_highest_degree_iterative():
     pass
