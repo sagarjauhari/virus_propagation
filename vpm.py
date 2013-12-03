@@ -12,7 +12,7 @@ try:
 except ImportError:
     raise ImportError("Config file unavailable")
 
-def sis_vpm_simulate(graph, B, D, c, t):
+def sis_vpm_simulate(graph, B, D, c, t, immunize=None):
     """
     Simulates the propagation of a virus with the SIS VPM
     graph: contact network
@@ -31,8 +31,15 @@ def sis_vpm_simulate(graph, B, D, c, t):
     During each time interval t, an infected node i tries to infect its
     neighbors with probability B. At the same time, i may be cured with
     probability D.
+
+    If there is a list of nodes passed as the 'immunize' param, then
+    those nodes are immunized at the beginning of the simulation.
     """
     assert 0<=c<=1, ' c should be between 0 and 1'
+
+    if immunize is not None:
+        graph.delete_vertices(immunize)
+
     N = len(list(graph.vs)) # Number of nodes
     infected = set(random.sample(xrange(N),int(c*N)))
 
