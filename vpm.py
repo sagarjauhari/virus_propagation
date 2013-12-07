@@ -7,6 +7,7 @@ Created on Sun Nov 24 17:49:17 2013
 from igraph import *
 import random
 import numpy as np
+import scipy.linalg
 
 try:
     from config import *
@@ -98,12 +99,20 @@ def immun_highest_degree_iterative(graph, k):
     return graph
 
 
-def immun_largest_eigen_vec():
-    pass
+def immun_largest_eigen_vec(graph, k):
+    N = size(graph.vs())
+    assert k<=N,'k should be less than N'
+
+    l_eig = scipy.linalg.eigh(graph.get_adjacency().data,
+                            eigvals=(N-1, N-1))
+    l_eig_vec =  [i[0] for i in l_eig[1]]
+    nodes = list(np.argsort(l_eig_vec)[-k:])
+    graph.delete_vertices(nodes)
+    return graph
 
 def run_simulation(model, runs, graph, B, D, c, t):
     """
-    Runs the simulation several times and return average nummber
+    Runs the simulation 'runs' # of times and return average nummber
     of infected nodes
     """
     if model=='SIS':
