@@ -13,8 +13,46 @@ try:
     from config import *
 except ImportError:
     raise ImportError("Config file unavailable")
+    
+def immun_random(graph, k):
+    N = size(graph.vs())
+    assert k<=N,'k should be less than N'
 
-def sis_vpm_simulate(graph, B, D, c, t, immunize=None):
+    nodes = random.sample(range(N), k)
+    graph.delete_vertices(nodes)
+    return graph
+
+def immun_highest_degree(graph, k):
+    N = size(graph.vs())
+    assert k<=N,'k should be less than N'
+
+    degrees = [graph.degree(i) for i in range(N)]
+    nodes = list(np.argsort(degrees)[-k:])
+    graph.delete_vertices(nodes)
+    return graph
+
+def immun_highest_degree_iterative(graph, k):
+    N = size(graph.vs())
+    assert k<=N,'k should be less than N'
+
+    for _i in range(k):
+        node = immun_highest_degree(graph, 1)
+        gg.delete_vertices(node)
+
+    return graph
+
+def immun_largest_eigen_vec(graph, k):
+    N = size(graph.vs())
+    assert k<=N,'k should be less than N'
+
+    l_eig = scipy.linalg.eigh(graph.get_adjacency().data,
+                            eigvals=(N-1, N-1))
+    l_eig_vec =  [i[0] for i in l_eig[1]]
+    nodes = list(np.argsort(l_eig_vec)[-k:])
+    graph.delete_vertices(nodes)
+    return graph
+
+def sis_vpm_simulate(graph, B, D, c, t, immunize=None, k=None):
     """
     Simulates the propagation of a virus with the SIS VPM
     graph: contact network
@@ -38,9 +76,16 @@ def sis_vpm_simulate(graph, B, D, c, t, immunize=None):
     those nodes are immunized at the beginning of the simulation.
     """
     assert 0<=c<=1, ' c should be between 0 and 1'
+    
+    immun_dict = {
+        'policy_a': lambda: immun_random(graph, k),
+        'policy_b': lambda: immun_highest_degree(graph, k),
+        'policy_c': lambda: immun_highest_degree_iterative(graph, k),
+        'policy_d': lambda: immun_largest_eigen_vec(graph, k)
+    }
 
     if immunize is not None:
-        graph.delete_vertices(immunize)
+        graph = immun_dict[immunize]
 
     N = len(list(graph.vs)) # Number of nodes
     infected = set(random.sample(xrange(N),int(c*N)))
@@ -71,44 +116,7 @@ def sis_vpm_simulate(graph, B, D, c, t, immunize=None):
         num_infected.append(len(infected))
     return num_infected
 
-def immun_random(graph, k):
-    N = size(graph.vs())
-    assert k<=N,'k should be less than N'
 
-    nodes = random.sample(range(N), k)
-    graph.delete_vertices(nodes)
-    return graph
-
-def immun_highest_degree(graph, k):
-    N = size(graph.vs())
-    assert k<=N,'k should be less than N'
-
-    degrees = [graph.degree(i) for i in range(N)]
-    nodes = list(np.argsort(degrees)[-k:])
-    graph.delete_vertices(nodes)
-    return graph
-
-def immun_highest_degree_iterative(graph, k):
-    N = size(graph.vs())
-    assert k<=N,'k should be less than N'
-
-    for _i in range(k):
-        node = immun_highest_degree(graph, 1)
-        gg.delete_vertices(node)
-
-    return graph
-
-
-def immun_largest_eigen_vec(graph, k):
-    N = size(graph.vs())
-    assert k<=N,'k should be less than N'
-
-    l_eig = scipy.linalg.eigh(graph.get_adjacency().data,
-                            eigvals=(N-1, N-1))
-    l_eig_vec =  [i[0] for i in l_eig[1]]
-    nodes = list(np.argsort(l_eig_vec)[-k:])
-    graph.delete_vertices(nodes)
-    return graph
 
 def run_simulation(model, runs, graph, B, D, c, t):
     """
