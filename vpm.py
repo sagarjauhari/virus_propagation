@@ -9,21 +9,24 @@ import random
 import numpy as np
 import scipy.linalg
 
+dbg = False #Debug flag
+
 try:
     from config import *
 except ImportError:
     raise ImportError("Config file unavailable")
-    
+
 def immun_random(graph, k):
-    N = size(graph.vs())
+    N = np.size(graph.vs())
     assert k<=N,'k should be less than N'
+    if dbg: print 'initial size: %d'%(N)
 
     nodes = random.sample(range(N), k)
     graph.delete_vertices(nodes)
     return graph
 
 def immun_highest_degree(graph, k):
-    N = size(graph.vs())
+    N = np.size(graph.vs())
     assert k<=N,'k should be less than N'
 
     degrees = [graph.degree(i) for i in range(N)]
@@ -32,7 +35,7 @@ def immun_highest_degree(graph, k):
     return graph
 
 def immun_highest_degree_iterative(graph, k):
-    N = size(graph.vs())
+    N = np.size(graph.vs())
     assert k<=N,'k should be less than N'
 
     for _i in range(k):
@@ -42,7 +45,7 @@ def immun_highest_degree_iterative(graph, k):
     return graph
 
 def immun_largest_eigen_vec(graph, k):
-    N = size(graph.vs())
+    N = np.size(graph.vs())
     assert k<=N,'k should be less than N'
 
     l_eig = scipy.linalg.eigh(graph.get_adjacency().data,
@@ -72,7 +75,7 @@ def sis_vpm_simulate(graph, B, D, c, t, immunize=None, k=None):
     neighbors with probability B. At the same time, i may be cured with
     probability D.
 
-    If there is a list of nodes passed as the 'immunize' param, then
+    If a policy name is passed as the 'immunize' param, then
     those nodes are immunized at the beginning of the simulation.
     """
     assert 0<=c<=1, ' c should be between 0 and 1'
@@ -83,11 +86,12 @@ def sis_vpm_simulate(graph, B, D, c, t, immunize=None, k=None):
         'policy_c': lambda: immun_highest_degree_iterative(graph, k),
         'policy_d': lambda: immun_largest_eigen_vec(graph, k)
     }
-
     if immunize is not None:
-        graph = immun_dict[immunize]
+        if immunize=='policy_a':
+            graph = immun_dict[immunize]()
 
-    N = len(list(graph.vs)) # Number of nodes
+    N = np.size(graph.vs) # Number of nodes
+    if dbg: print 'graph size: %d'%(N)
     infected = set(random.sample(xrange(N),int(c*N)))
 
     num_infected = []
@@ -118,15 +122,19 @@ def sis_vpm_simulate(graph, B, D, c, t, immunize=None, k=None):
 
 
 
-def run_simulation(model, runs, graph, B, D, c, t):
+def run_simulation(model, runs, graph, B, D, c, t, immunize=None, k=None):
     """
     Runs the simulation 'runs' # of times and return average nummber
     of infected nodes
     """
+    graph_ = graph.copy()
+    print 'Running simulation %d times'%(runs)
     if model=='SIS':
         sim_res=range(runs)
         for i in range(runs):
-            sim_res[i] = sis_vpm_simulate(graph, B, D, c, t)
+            sim_res[i] = sis_vpm_simulate(graph_, B, D, c, t,
+                                          immunize=immunize, k=k)
+            graph_ = graph.copy()
 
         avg_res = []
         for i in range(t):
