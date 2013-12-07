@@ -15,6 +15,18 @@ try:
     from config import *
 except ImportError:
     raise ImportError("Config file unavailable")
+    
+def get_larg_eig(graph):
+    M = len(list(graph.vs))
+    l_eig = scipy.linalg.eigh(graph.get_adjacency().data,
+                            eigvals_only=True,
+                            eigvals=(M-1, M-1))
+    return l_eig[0]
+
+def get_eff_strength(graph, b, d, l_eig=None):
+    if l_eig==None:
+        l_eig = get_larg_eig(graph)
+    return l_eig, l_eig*b/d
 
 def immun_random(graph, k):
     N = np.size(graph.vs())
@@ -39,9 +51,7 @@ def immun_highest_degree_iterative(graph, k):
     assert k<=N,'k should be less than N'
 
     for _i in range(k):
-        node = immun_highest_degree(graph, 1)
-        gg.delete_vertices(node)
-
+        immun_highest_degree(graph, 1)
     return graph
 
 def immun_largest_eigen_vec(graph, k):
@@ -55,7 +65,8 @@ def immun_largest_eigen_vec(graph, k):
     graph.delete_vertices(nodes)
     return graph
 
-def sis_vpm_simulate(graph, B, D, c, t, immunize=None, k=None):
+def sis_vpm_simulate(graph, B, D, c, t, immunize=None, k=None,
+                     run_simulate=True):
     """
     Simulates the propagation of a virus with the SIS VPM
     graph: contact network
@@ -78,7 +89,6 @@ def sis_vpm_simulate(graph, B, D, c, t, immunize=None, k=None):
     If a policy name is passed as the 'immunize' param, then
     those nodes are immunized at the beginning of the simulation.
     """
-    assert 0<=c<=1, ' c should be between 0 and 1'
     
     immun_dict = {
         'policy_a': lambda: immun_random(graph, k),
@@ -87,11 +97,19 @@ def sis_vpm_simulate(graph, B, D, c, t, immunize=None, k=None):
         'policy_d': lambda: immun_largest_eigen_vec(graph, k)
     }
     if immunize is not None:
-        if immunize=='policy_a':
-            graph = immun_dict[immunize]()
+        graph = immun_dict[immunize]()
 
+    if not run_simulate:
+        larg_eig, eff_strength = get_eff_strength(graph, B1, D1)
+        print 'Largest Eigen Value: %0.3f'% (larg_eig)
+        print 'Effective Strength: %0.3f'%(eff_strength)
+        return
+        
     N = np.size(graph.vs) # Number of nodes
     if dbg: print 'graph size: %d'%(N)
+    
+    assert 0<=c<=1, ' c should be between 0 and 1'
+
     infected = set(random.sample(xrange(N),int(c*N)))
 
     num_infected = []
