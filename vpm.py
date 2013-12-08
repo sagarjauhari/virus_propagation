@@ -112,7 +112,7 @@ def sis_vpm_simulate(graph, B, D, c, t, immunize=None, k=None,
 
     infected = set(random.sample(xrange(N),int(c*N)))
 
-    num_infected = []
+    num_infected = [len(infected)]
 
     #Start simulation
     for _i in range(t):
@@ -157,6 +157,13 @@ def run_simulation(model, runs, graph, B, D, c, t, immunize=None, k=None):
         avg_res = []
         for i in range(t):
             avg_res.append(mean([sim_res[j][i] for j in range(runs)]))
+        
+        print 'Nodes initially infected: %d'%(avg_res[0])
+        print 'Avg. Nodes finally infected: %d'%(avg_res[-1])
+        if avg_res[0] <= avg_res[-1]:
+            print 'Virus has caused an epidemic'
+        else:
+            print 'Virus epidemic has been prevented'
         return avg_res
 
 if __name__=='__main__':
