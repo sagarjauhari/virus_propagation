@@ -101,9 +101,7 @@ def sis_vpm_simulate(graph, B, D, c, t, immunize=None, k=None,
 
     if not run_simulate:
         larg_eig, eff_strength = get_eff_strength(graph, B1, D1)
-        print 'Largest Eigen Value: %0.3f'% (larg_eig)
-        print 'Effective Strength: %0.3f'%(eff_strength)
-        return
+        return larg_eig, eff_strength
         
     N = np.size(graph.vs) # Number of nodes
     if dbg: print 'graph size: %d'%(N)
@@ -165,6 +163,17 @@ def run_simulation(model, runs, graph, B, D, c, t, immunize=None, k=None):
         else:
             print 'Virus epidemic has been prevented'
         return avg_res
+        
+def num_vaccince_analysis(graph, B, D, immunize, k_list):
+    eff_strens=[]
+    graph_ = graph.copy()
+    for k in k_list:                    
+        larg_eig, eff_stren = sis_vpm_simulate(graph_, 
+                B, D, None, None, immunize=immunize, 
+                k=k, run_simulate=False)
+        eff_strens.append(eff_stren)        
+        graph_ = graph.copy()
+    return eff_strens
 
 if __name__=='__main__':
     g=Graph()
