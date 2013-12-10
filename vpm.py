@@ -183,18 +183,19 @@ class Alternating_Networks:
         S2=(1-D)*I + B*A2;
         (A1 and A2 are the adjacency matrices of the two alternating networks)
         """
-        print "Calculating S1"
+        if dbg: print "Calculating S1"
         S1 = (1-D)*np.identity(len(g1.vs))+B*np.array(g1.get_adjacency().data)
         
-        print "Calculating S2"
+        if dbg: print "Calculating S2"
         S2 = (1-D)*np.identity(len(g2.vs))+B*np.array(g2.get_adjacency().data)
+        
+        if dbg: print "Calculating S = S1 X S2"
         return S1.dot(S2)
         
     def get_eff_strength(self, g1, g2, B, D):
-        print "Calculating S = S1 X S2"
         S = self.system_matrix(g1, g2, B, D)
         M = np.shape(S)[0]
-        print "Calculating largest eigen value"
+        if dbg: print "Calculating largest eigen value"
         l_eig = scipy.linalg.eigh(S, eigvals_only=True, eigvals=(M-1, M-1))
         return l_eig[0]
         
