@@ -199,23 +199,59 @@ class Alternating_Networks:
         l_eig = scipy.linalg.eigh(S, eigvals_only=True, eigvals=(M-1, M-1))
         return l_eig[0]
         
+    def immun_random(self, graph, k):
+        N = np.size(graph.vs())
+        assert k<=N,'k should be less than N'
+        if dbg: print 'initial size: %d'%(N)
+    
+        nodes = random.sample(range(N), k)
+        graph.delete_vertices(nodes)
+        return graph
+    
+    def immun_highest_degree(self, graph, k):
+        N = np.size(graph.vs())
+        assert k<=N,'k should be less than N'
+    
+        degrees = [graph.degree(i) for i in range(N)]
+        nodes = list(np.argsort(degrees)[-k:])
+        graph.delete_vertices(nodes)
+        return graph
+    
+    def immun_highest_degree_iterative(self, graph, k):
+        N = np.size(graph.vs())
+        assert k<=N,'k should be less than N'
+    
+        for _i in range(k):
+            immun_highest_degree(graph, 1)
+        return graph
+    
+    def immun_largest_eigen_vec(self, graph, k):
+        N = np.size(graph.vs())
+        assert k<=N,'k should be less than N'
+    
+        l_eig = scipy.linalg.eigh(graph.get_adjacency().data,
+                                eigvals=(N-1, N-1))
+        l_eig_vec =  [i[0] for i in l_eig[1]]
+        nodes = list(np.argsort(l_eig_vec)[-k:])
+        graph.delete_vertices(nodes)
+        return graph
+        
     def sis_vpm_simulate(self, graphs, B, D, c, t, immunize=None, k=None,
                      run_simulate=True):
-        #TODO: Update for graph's'
-        """
+
         immun_dict = {
-            'policy_a': lambda: immun_random(graph, k),
-            'policy_b': lambda: immun_highest_degree(graph, k),
-            'policy_c': lambda: immun_highest_degree_iterative(graph, k),
-            'policy_d': lambda: immun_largest_eigen_vec(graph, k)
+            'policy_a': lambda: self.immun_random(graphs, k),
+            'policy_b': lambda: self.immun_highest_degree(graphs, k),
+            'policy_c': lambda: self.immun_highest_degree_iterative(graphs, k),
+            'policy_d': lambda: self.immun_largest_eigen_vec(graphs, k)
         }
         if immunize is not None:
-            graph = immun_dict[immunize]()
+            graphs = immun_dict[immunize]()
     
         if not run_simulate:
             larg_eig, eff_strength = get_eff_strength(graph, B1, D1)
             return larg_eig, eff_strength
-        """
+
         N = np.size(graphs[0].vs) # Number of nodes
         assert 0<=c<=1, ' c should be between 0 and 1'
         infected = set(random.sample(xrange(N),int(c*N)))
