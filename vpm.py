@@ -199,8 +199,49 @@ class Alternating_Networks:
         l_eig = scipy.linalg.eigh(S, eigvals_only=True, eigvals=(M-1, M-1))
         return l_eig[0]
         
+    def sis_vpm_simulate(graphs, B, D, c, t, immunize=None, k=None,
+                     run_simulate=True):
+        #TODO: Update for graph's'
+        """
+        immun_dict = {
+            'policy_a': lambda: immun_random(graph, k),
+            'policy_b': lambda: immun_highest_degree(graph, k),
+            'policy_c': lambda: immun_highest_degree_iterative(graph, k),
+            'policy_d': lambda: immun_largest_eigen_vec(graph, k)
+        }
+        if immunize is not None:
+            graph = immun_dict[immunize]()
     
-
+        if not run_simulate:
+            larg_eig, eff_strength = get_eff_strength(graph, B1, D1)
+            return larg_eig, eff_strength
+        """
+        N = np.size(graphs[0].vs) # Number of nodes
+        assert 0<=c<=1, ' c should be between 0 and 1'
+        infected = set(random.sample(xrange(N),int(c*N)))
+        num_infected = [len(infected)]
+    
+        #Start simulation
+        for _i in range(t):
+            graph = graphs[_i%len(graphs)] #Alternate the graphs
+            infected_new = set()
+            for n in infected:
+                nbrs = graph.neighbors(n)
+                nbrs_infected = random.sample(nbrs, int(B*len(nbrs)))
+                for j in nbrs_infected:
+                    infected_new.add(j)
+            cured = random.sample(infected, int(math.ceil(D*len(infected))))
+    
+            for n in infected_new:
+                infected.add(n)
+    
+            for n in cured:
+                infected.remove(n)
+    
+            num_infected.append(len(infected))
+        return num_infected
+        
+    
 if __name__=='__main__':
     g=Graph()
     g.add_vertices(10)
