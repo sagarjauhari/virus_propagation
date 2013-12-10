@@ -199,42 +199,47 @@ class Alternating_Networks:
         l_eig = scipy.linalg.eigh(S, eigvals_only=True, eigvals=(M-1, M-1))
         return l_eig[0]
         
-    def immun_random(self, graph, k):
-        N = np.size(graph.vs())
+    def immun_random(self, graphs, k):
+        N = np.size(graphs[0].vs())
         assert k<=N,'k should be less than N'
-        if dbg: print 'initial size: %d'%(N)
     
         nodes = random.sample(range(N), k)
-        graph.delete_vertices(nodes)
-        return graph
+        for g in graphs:
+            g.delete_vertices(nodes)
+        return graphs
     
-    def immun_highest_degree(self, graph, k):
-        N = np.size(graph.vs())
+    def immun_highest_degree(self, graphs, k):
+        N = np.size(graphs[0].vs())
         assert k<=N,'k should be less than N'
     
-        degrees = [graph.degree(i) for i in range(N)]
+        degrees = [mean(graphs[0].degree(i), 
+                        graphs[1].degree(1)) for i in range(N)]
         nodes = list(np.argsort(degrees)[-k:])
-        graph.delete_vertices(nodes)
-        return graph
+        for g in graphs:        
+            g.delete_vertices(nodes)
+        return graphs
     
-    def immun_highest_degree_iterative(self, graph, k):
-        N = np.size(graph.vs())
+    def immun_highest_degree_iterative(self, graphs, k):
+        N = np.size(graphs[0].vs())
         assert k<=N,'k should be less than N'
     
         for _i in range(k):
-            immun_highest_degree(graph, 1)
-        return graph
+            immun_highest_degree(graphs, 1)
+        return graphs
     
-    def immun_largest_eigen_vec(self, graph, k):
-        N = np.size(graph.vs())
+    def immun_largest_eigen_vec(self, graphs, k, B, D):
+        N = np.size(graphs[0].vs())
         assert k<=N,'k should be less than N'
+        
+        S = system_matrix(self, graphs[0], graphs[1], B, D)
+        M=np.shape(S)[0]
     
-        l_eig = scipy.linalg.eigh(graph.get_adjacency().data,
-                                eigvals=(N-1, N-1))
+        l_eig = scipy.linalg.eigh(S, eigvals=(M-1, M-1))
         l_eig_vec =  [i[0] for i in l_eig[1]]
         nodes = list(np.argsort(l_eig_vec)[-k:])
-        graph.delete_vertices(nodes)
-        return graph
+        for g in graphs:        
+            g.delete_vertices(nodes)
+        return graphs
         
     def sis_vpm_simulate(self, graphs, B, D, c, t, immunize=None, k=None,
                      run_simulate=True):
