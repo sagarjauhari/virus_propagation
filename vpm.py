@@ -199,7 +199,7 @@ class Alternating_Networks:
         l_eig = scipy.linalg.eigh(S, eigvals_only=True, eigvals=(M-1, M-1))
         return l_eig[0]
         
-    def sis_vpm_simulate(graphs, B, D, c, t, immunize=None, k=None,
+    def sis_vpm_simulate(self, graphs, B, D, c, t, immunize=None, k=None,
                      run_simulate=True):
         #TODO: Update for graph's'
         """
@@ -241,13 +241,13 @@ class Alternating_Networks:
             num_infected.append(len(infected))
         return num_infected
         
-    def run_simulation(model, runs, graphs, B, D, c, t, immunize=None, k=None):
+    def run_simulation(self, model, runs, graphs, B, D, c, t, immunize=None, k=None):
         graphs_ = [i.copy() for i in graphs]
         print 'Running simulation %d times'%(runs)
         if model=='SIS':
             sim_res=range(runs)
             for i in range(runs):
-                sim_res[i] = sis_vpm_simulate(graphs_, B, D, c, t,
+                sim_res[i] = self.sis_vpm_simulate(graphs_, B, D, c, t,
                                               immunize=immunize, k=k)
                 graphs_ = [i.copy() for i in graphs]
     
