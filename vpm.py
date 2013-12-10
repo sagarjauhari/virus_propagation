@@ -241,6 +241,27 @@ class Alternating_Networks:
             num_infected.append(len(infected))
         return num_infected
         
+    def run_simulation(model, runs, graphs, B, D, c, t, immunize=None, k=None):
+        graphs_ = [i.copy() for i in graphs]
+        print 'Running simulation %d times'%(runs)
+        if model=='SIS':
+            sim_res=range(runs)
+            for i in range(runs):
+                sim_res[i] = sis_vpm_simulate(graphs_, B, D, c, t,
+                                              immunize=immunize, k=k)
+                graphs_ = [i.copy() for i in graphs]
+    
+            avg_res = []
+            for i in range(t):
+                avg_res.append(mean([sim_res[j][i] for j in range(runs)]))
+            
+            print 'Nodes initially infected: %d'%(avg_res[0])
+            print 'Avg. Nodes finally infected: %d'%(avg_res[-1])
+            if avg_res[0] <= avg_res[-1]:
+                print 'Virus has caused an epidemic'
+            else:
+                print 'Virus epidemic has been prevented'
+            return avg_res
     
 if __name__=='__main__':
     g=Graph()
