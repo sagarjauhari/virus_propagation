@@ -174,6 +174,18 @@ def num_vaccince_analysis(graph, B, D, immunize, k_list):
         eff_strens.append(eff_stren)        
         graph_ = graph.copy()
     return eff_strens
+    
+class Alternating_Networks:
+    def system_matrix(g1, g2, B, D):
+        """
+        System-matrix is given by S1xS2, where 
+        S1=(1-D)*I + B*A1; 
+        S2=(1-D)*I + B*A2;
+        (A1 and A2 are the adjacency matrices of the two alternating networks)
+        """
+        S1 = (1-D)*np.identity(len(g1.vs))+B*np.array(g1.get_adjacency().data)
+        S2 = (1-D)*np.identity(len(g2.vs))+B*np.array(g2.get_adjacency().data)
+        return np.cross(S1, S2)
 
 if __name__=='__main__':
     g=Graph()
