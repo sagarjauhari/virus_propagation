@@ -224,7 +224,7 @@ class Alternating_Networks:
         assert k<=N,'k should be less than N'
     
         for _i in range(k):
-            immun_highest_degree(graphs, 1)
+            self.immun_highest_degree(graphs, 1)
         return graphs
     
     def immun_largest_eigen_vec(self, graphs, k, B, D):
@@ -248,14 +248,14 @@ class Alternating_Networks:
             'policy_a': lambda: self.immun_random(graphs, k),
             'policy_b': lambda: self.immun_highest_degree(graphs, k),
             'policy_c': lambda: self.immun_highest_degree_iterative(graphs, k),
-            'policy_d': lambda: self.immun_largest_eigen_vec(graphs, k)
+            'policy_d': lambda: self.immun_largest_eigen_vec(graphs, k, B, D)
         }
         if immunize is not None:
             graphs = immun_dict[immunize]()
     
         if not run_simulate:
-            larg_eig, eff_strength = get_eff_strength(graph, B1, D1)
-            return larg_eig, eff_strength
+            eff_strength = self.get_eff_strength(graphs[0], graphs[1], B1, D1)
+            return eff_strength
 
         N = np.size(graphs[0].vs) # Number of nodes
         assert 0<=c<=1, ' c should be between 0 and 1'
