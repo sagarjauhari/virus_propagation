@@ -212,8 +212,8 @@ class Alternating_Networks:
         N = np.size(graphs[0].vs())
         assert k<=N,'k should be less than N'
     
-        degrees = [mean(graphs[0].degree(i), 
-                        graphs[1].degree(1)) for i in range(N)]
+        degrees = [mean([graphs[0].degree(i), 
+                        graphs[1].degree(1)]) for i in range(N)]
         nodes = list(np.argsort(degrees)[-k:])
         for g in graphs:        
             g.delete_vertices(nodes)
@@ -231,7 +231,7 @@ class Alternating_Networks:
         N = np.size(graphs[0].vs())
         assert k<=N,'k should be less than N'
         
-        S = system_matrix(self, graphs[0], graphs[1], B, D)
+        S = self.system_matrix(graphs[0], graphs[1], B, D)
         M=np.shape(S)[0]
     
         l_eig = scipy.linalg.eigh(S, eigvals=(M-1, M-1))
