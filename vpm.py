@@ -303,6 +303,17 @@ class Alternating_Networks:
             else:
                 print 'Virus epidemic has been prevented'
             return avg_res
+            
+    def num_vaccince_analysis(self, graph, B, D, immunize, k_list):
+        eff_strens=[]
+        graph_ = [i.copy() for i in graphs]
+        for k in k_list:                    
+            eff_stren = self.sis_vpm_simulate(graph_, 
+                    B, D, None, None, immunize=immunize, 
+                    k=k, run_simulate=False)
+            eff_strens.append(eff_stren)        
+            graph_ = [i.copy() for i in graphs]
+        return eff_strens
     
 if __name__=='__main__':
     g=Graph()
