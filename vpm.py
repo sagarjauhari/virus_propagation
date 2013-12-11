@@ -304,7 +304,7 @@ class Alternating_Networks:
                 print 'Virus epidemic has been prevented'
             return avg_res
             
-    def num_vaccince_analysis(self, graph, B, D, immunize, k_list):
+    def num_vaccince_analysis(self, graphs, B, D, immunize, k_list):
         eff_strens=[]
         graph_ = [i.copy() for i in graphs]
         for k in k_list:                    
